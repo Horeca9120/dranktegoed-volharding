@@ -1,63 +1,44 @@
-<!DOCTYPE html>
-
-<html lang="nl">
-
-<head>
-
-  <meta charset="UTF-8">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>Dranktegoed Volharding</title>
-
-  <style>
-
-    body {
-
-      font-family: Arial, sans-serif;
-
-      text-align: center;
-
-      padding: 30px;
-
-      background: #f5f5f5;
-
+<!DOCTYPE html><html><head><script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>body{font-family:Arial,sans-serif;background:#f2f5fa;color:#162c47;margin:0;padding:20px}main{max-width:550px;margin:auto;background:white;border-radius:18px;padding:24px;box-shadow:0 3px 20px #0001}h1{font-size:24px;margin:0 0 8px}label{display:block;margin:15px 0 6px;font-weight:bold}input{box-sizing:border-box;width:100%;padding:14px;border:1px solid #aeb9c8;border-radius:9px;font-size:18px}button{padding:15px;border:0;border-radius:10px;font-size:17px;font-weight:bold;background:#174d85;color:white;cursor:pointer;margin-top:12px;width:100%}button:disabled{opacity:.4}button.secondary{background:#e6ebf2;color:#173c65}.balance{font-size:64px;text-align:center;font-weight:bold;margin:12px}.notice{padding:12px;border-radius:9px;background:#eaf1fa;margin:12px 0}.error{background:#ffe5e5;color:#9d1616}.success{background:#e2f6e8;color:#136b2f}video{width:100%;max-height:260px;border-radius:10px;background:#111}small{color:#526477}
+</style></head><body><main><h1>Volharding · Dranktegoed</h1><small>Vaste kantinetablet</small><label>Toegangscode kantine</label><input id="pin" type="password" autocomplete="off" placeholder="Code"><label>QR-code scannen of token invoeren</label><div id="qr-reader" style="width:100%;margin-top:12px;" hidden></div> <video id="video" playsinline muted hidden></video><button id="camera" onclick="startCamera()">Camera starten</button><input id="token" placeholder="QR-token" autocomplete="off"><button class="secondary" onclick="lookup()">Trainer opzoeken</button><div id="message" class="notice">Klaar om te scannen.</div><section id="trainer" hidden><h2 id="name"></h2><div class="balance" id="balance"></div><button id="debit" onclick="debitPoint()">1 drankpunt afboeken</button><button class="secondary" onclick="resetTrainer()">Volgende trainer</button></section></main><script>
+let current=null,stream=null,scanning=false;const el=id=>document.getElementById(id);
+function msg(t,error=false){el('message').textContent=t;el('message').className='notice'+(error?' error':'');}
+function invoke(name,args,done){const runner=google.script.run.withSuccessHandler(done).withFailureHandler(e=>{msg(e.message||String(e),true);el('debit').disabled=false;});runner[name](...args);}
+function lookup(){const token=el('token').value.trim(),pin=el('pin').value;if(!token||!pin){msg('Vul toegangscode en QR-token in.',true);return;}msg('Trainer opzoeken…');invoke('findTrainer',[token,pin],r=>{current=r;el('name').textContent=r.name;el('balance').textContent=r.balance;el('trainer').hidden=false;el('debit').disabled=r.balance<1;msg(r.balance<1?'Geen punten: gratis consumptie geblokkeerd.':'Controleer de naam en bevestig de consumptie.',r.balance<1);stopCamera();});}
+function debitPoint(){if(!current)return;el('debit').disabled=true;msg('Consumptie registreren…');invoke('debit',[current.token,el('pin').value],r=>{current.balance=r.balance;el('balance').textContent=r.balance;el('debit').disabled=r.balance<1;msg('1 punt afgeboekt. Nieuw saldo: '+r.balance);});}
+function resetTrainer(){current=null;el('trainer').hidden=true;el('token').value='';msg('Klaar voor volgende trainer.');}
+async function startCamera() {
+  try {
+    if (typeof Html5Qrcode === 'undefined') {
+      throw new Error('QR-scannerbibliotheek niet geladen.');
     }
 
-    button {
 
-      background: #167a42;
 
-      color: white;
+    const scanner = new Html5Qrcode('qr-reader');
 
-      border: none;
+    await scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: 250 },
+      async (decodedText) => {
+        await scanner.stop();
+        el('token').value = decodedText;
+        lookup();
+      },
+      () => {}
+    );
 
-      border-radius: 8px;
+    window.qrScanner = scanner;
+    msg('Camera gestart. Houd de QR-code voor de camera.');
+  } catch (e) {
+    msg('Camera niet beschikbaar: ' + e.message, true);
+  }
+}
+function stopCamera() {
+  if (window.qrScanner) {
+    window.qrScanner.stop().catch(() => {});
+    window.qrScanner = null;
+  }
+}
+</script></body></html>
 
-      padding: 18px;
-
-      font-size: 18px;
-
-    }
-
-  </style>
-
-</head>
-
-<body>
-
-  <h1>Atletiek Volharding Beveren</h1>
-
-  <h2>Dranktegoedsysteem</h2>
-
-  <p>Welkom bij de QR-drankscanner.</p>
-
-  <button onclick="alert('Test geslaagd!')">
-
-    Test systeem
-
-  </button>
-
-</body>
-
-</html>
