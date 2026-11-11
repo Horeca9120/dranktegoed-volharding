@@ -1,5 +1,24 @@
 <!DOCTYPE html><html><head><script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>body{font-family:Arial,sans-serif;background:#f2f5fa;color:#162c47;margin:0;padding:20px}main{max-width:550px;margin:auto;background:white;border-radius:18px;padding:24px;box-shadow:0 3px 20px #0001}h1{font-size:24px;margin:0 0 8px}label{display:block;margin:15px 0 6px;font-weight:bold}input{box-sizing:border-box;width:100%;padding:14px;border:1px solid #aeb9c8;border-radius:9px;font-size:18px}button{padding:15px;border:0;border-radius:10px;font-size:17px;font-weight:bold;background:#174d85;color:white;cursor:pointer;margin-top:12px;width:100%}button:disabled{opacity:.4}button.secondary{background:#e6ebf2;color:#173c65}.balance{font-size:64px;text-align:center;font-weight:bold;margin:12px}.notice{padding:12px;border-radius:9px;background:#eaf1fa;margin:12px 0}.error{background:#ffe5e5;color:#9d1616}.success{background:#e2f6e8;color:#136b2f}video{width:100%;max-height:260px;border-radius:10px;background:#111}small{color:#526477}
+#qr-reader {
+
+  width: 100%;
+
+  min-height: 300px;
+
+  display: block;
+
+}
+
+#qr-reader video {
+
+  width: 100% !important;
+
+  height: auto !important;
+
+  display: block !important;
+
+}
 </style></head><body><main><h1>Volharding · Dranktegoed</h1><small>Vaste kantinetablet</small><label>Toegangscode kantine</label><input id="pin" type="password" autocomplete="off" placeholder="Code"><label>QR-code scannen of token invoeren</label><div id="qr-reader" style="width:100%;margin-top:12px;" hidden></div> <video id="video" playsinline muted hidden></video><button id="camera" onclick="startCamera()">Camera starten</button><input id="token" placeholder="QR-token" autocomplete="off"><button class="secondary" onclick="lookup()">Trainer opzoeken</button><div id="message" class="notice">Klaar om te scannen.</div><section id="trainer" hidden><h2 id="name"></h2><div class="balance" id="balance"></div><button id="debit" onclick="debitPoint()">1 drankpunt afboeken</button><button class="secondary" onclick="resetTrainer()">Volgende trainer</button></section></main><script>
 let current=null,stream=null,scanning=false;const el=id=>document.getElementById(id);
 function msg(t,error=false){el('message').textContent=t;el('message').className='notice'+(error?' error':'');}
