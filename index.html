@@ -40,6 +40,7 @@ async function startCamera() {
       { facingMode: 'environment' },
       { fps: 10 },
       async (decodedText) => {
+        alert("QR-code herkend!");
         await scanner.stop();
         el('token').value = decodedText;
         lookup();
