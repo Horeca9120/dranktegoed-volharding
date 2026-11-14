@@ -45,7 +45,9 @@ async function startCamera() {
         el('token').value = decodedText;
         lookup();
       },
-      () => {}
+      (errorMessage) => {
+  console.log("QR-scanfout:", errorMessage);
+}
     );
 
     window.qrScanner = scanner;
