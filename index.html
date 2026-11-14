@@ -38,7 +38,7 @@ async function startCamera() {
 
     await scanner.start(
       { facingMode: 'environment' },
-      { fps: 10, qrbox: 350 },
+      { fps: 10 },
       async (decodedText) => {
         await scanner.stop();
         el('token').value = decodedText;
